@@ -1,0 +1,20 @@
+CREATE TABLE eemployee (
+    id INT PRIMARY KEY,
+    emp_id INT,
+    name VARCHAR(200),
+    gender VARCHAR(20),
+    timee TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO eemployee (id, emp_id, name, gender) VALUES (1, 1, 'ABC', 'Female');
+INSERT INTO eemployee (id, emp_id, name, gender) VALUES (2, 1, 'ABC', 'Male');
+INSERT INTO eemployee (id, emp_id, name, gender) VALUES (3, 2, 'XYZ', 'Female');
+
+
+SELECT * 
+FROM eemployee e1 
+WHERE e1.timee = (
+    SELECT MAX(e2.timee) 
+    FROM eemployee e2 
+    WHERE e1.emp_id = e2.emp_id
+);
