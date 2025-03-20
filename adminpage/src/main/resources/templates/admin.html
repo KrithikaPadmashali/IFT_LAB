@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Page</title>
+    <style>
+        form {
+            width: 300px;
+            margin: 100px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+			margin-right: 15px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+			margin-right: 15px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color:#ff0191;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+			margin-right: 15px;
+        }
+        button:hover {
+            background-color: #de2153;
+			
+        }
+    </style>
+</head>
+<body>
+
+    <form th:action="@{/admin/save}" th:object="${user}" method="post">
+        <label for="username">Enter Username:</label>
+        <input type="text" id="username" th:field="*{username}" required>
+        
+        <label for="password">Enter Password:</label>
+        <input type="password" id="password" th:field="*{password}" required>
+        
+        <button type="submit">Sign In</button>
+    </form>
+
+    <h2>Registered Users:</h2>
+    <ul>
+        <li th:each="user : ${users}">
+            <span th:text="${user.username}">Username</span> - 
+            <span th:text="${user.password}">Password</span>
+        </li>
+    </ul>
+
+</body>
+</html>
