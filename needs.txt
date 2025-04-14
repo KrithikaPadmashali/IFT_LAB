@@ -418,4 +418,122 @@ Home
 ===========================================================================================================================================================================================
 
 
+package com.example.lab56_p.entity;
+
+import jakarta.persistence.*;
+import java.util.*;
+
+@Entity
+public class Branch {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    private double rate;
+
+    @ManyToOne
+    private Branch parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private List<Branch> children = new ArrayList<>();
+
+    @OneToMany(mappedBy = "branch", cascade = CascadeType.ALL)
+    private List<Account> accounts = new ArrayList<>();
+
+    // Getters and Setters
+}
+package com.example.lab56_p.entity;
+
+import jakarta.persistence.*;
+
+@Entity
+public class Account {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String holderName;
+    private double rate;
+
+    @ManyToOne
+    private Branch branch;
+
+    // Getters and Setters
+}
+package com.example.lab56_p.repository;
+
+import com.example.lab56_p.entity.Branch;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface BranchRepository extends JpaRepository<Branch, Long> {}
+
+package com.example.lab56_p.repository;
+
+import com.example.lab56_p.entity.Account;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface AccountRepository extends JpaRepository<Account, Long> {}
+
+package com.example.lab56_p.service;
+
+public interface BranchService {
+    void updateRate(Long branchId, double newRate);
+}
+package com.example.lab56_p.service.impl;
+
+import com.example.lab56_p.entity.Branch;
+import com.example.lab56_p.entity.Account;
+import com.example.lab56_p.repository.BranchRepository;
+import com.example.lab56_p.service.BranchService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
+
+@Service
+public class BranchServiceImpl implements BranchService {
+
+    @Autowired
+    private BranchRepository branchRepository;
+
+    @Override
+    @Transactional
+    public void updateRate(Long branchId, double newRate) {
+        Branch branch = branchRepository.findById(branchId).orElseThrow();
+        updateBranchRecursively(branch, newRate);
+        branchRepository.save(branch);  // Save the updated hierarchy
+    }
+
+    private void updateBranchRecursively(Branch branch, double newRate) {
+        branch.setRate(newRate);
+        for (Account account : branch.getAccounts()) {
+            account.setRate(newRate);
+        }
+        for (Branch child : branch.getChildren()) {
+            updateBranchRecursively(child, newRate);
+        }
+    }
+}
+package com.example.lab56_p.controller;
+
+import com.example.lab56_p.service.BranchService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/branches")
+public class BranchController {
+
+    @Autowired
+    private BranchService branchService;
+
+    @PutMapping("/{id}/updateRate")
+    public String updateRate(@PathVariable Long id, @RequestParam double rate) {
+        branchService.updateRate(id, rate);
+        return "Rate updated successfully!";
+    }
+}
+
 
